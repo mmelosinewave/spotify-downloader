@@ -13,6 +13,7 @@ import urllib.request
 import sys
 import os
 import time
+import logging
 
 
 def generate_songname(tags):
@@ -104,13 +105,13 @@ def generate_youtube_url(raw_song, tries_remaining=5):
         return None
 
     if args.manual:
-        print(song)
-        print('')
-        print('0. Skip downloading this song')
+        logging.info(song)
+        logging.info('')
+        logging.info('0. Skip downloading this song')
         # fetch all video links on first page on YouTube
         for i, v in enumerate(videos):
-          print(u'{0}. {1} {2} {3}'.format(i+1, v['title'], v['videotime'], "http://youtube.com"+v['link']))
-        print('')
+          logging.info(u'{0}. {1} {2} {3}'.format(i+1, v['title'], v['videotime'], "http://youtube.com"+v['link']))
+        logging.info('')
         # let user select the song to download
         result = misc.input_link(videos)
         if result is None:
@@ -131,7 +132,7 @@ def generate_youtube_url(raw_song, tries_remaining=5):
                 possible_videos_by_duration = list(filter(lambda x: abs(x['seconds'] - (int(meta_tags['duration_ms'])/1000)) <= duration_tolerance, videos))
                 duration_tolerance += 1
                 if duration_tolerance > max_duration_tolerance:
-                    print(meta_tags['name'], 'by', meta_tags['artists'][0]['name'], 'was not found')
+                    logging.info(meta_tags['name'], 'by', meta_tags['artists'][0]['name'], 'was not found')
                     return None
 
             result = possible_videos_by_duration[0]
@@ -181,7 +182,7 @@ def feed_playlist(username):
             # in rare cases, playlists may not be found, so playlists['next']
             # is None. Skip these. Also see Issue #91.
             if playlist['name'] is not None:
-                print(u'{0:>5}. {1:<30}  ({2} tracks)'.format(
+                logging.info(u'{0:>5}. {1:<30}  ({2} tracks)'.format(
                     check, playlist['name'],
                     playlist['tracks']['total']))
                 links.append(playlist)
@@ -191,9 +192,9 @@ def feed_playlist(username):
         else:
             break
 
-    print('')
+    logging.info('')
     playlist = misc.input_link(links)
-    print('')
+    logging.info('')
     write_playlist(playlist)
 
 
@@ -208,7 +209,7 @@ def write_tracks(text_file, tracks):
                 try:
                     file_out.write(track['external_urls']['spotify'] + '\n')
                 except KeyError:
-                    print(u'Skipping track {0} by {1} (local only?)'.format(
+                    logging.info(u'Skipping track {0} by {1} (local only?)'.format(
                         track['name'], track['artists'][0]['name']))
             # 1 page = 50 results
             # check if there are more pages
@@ -222,7 +223,7 @@ def write_playlist(playlist):
     results = spotify.user_playlist(
         playlist['owner']['id'], playlist['id'], fields='tracks,next')
     text_file = u'{0}.txt'.format(slugify(playlist['name'], ok='-_()[]{}'))
-    print(u'Feeding {0} tracks to {1}'.format(playlist['tracks']['total'], text_file))
+    logging.info(u'Feeding {0} tracks to {1}'.format(playlist['tracks']['total'], text_file))
 
     tracks = results['tracks']
     write_tracks(text_file, tracks)
@@ -231,7 +232,7 @@ def write_playlist(playlist):
 def write_album(album):
     tracks = spotify.album_tracks(album['id'])
     text_file = u'{0}.txt'.format(slugify(album['name'], ok='-_()[]{}'))
-    print(u'Feeding {0} tracks to {1}'.format(tracks['total'], text_file))
+    logging.info(u'Feeding {0} tracks to {1}'.format(tracks['total'], text_file))
 
     write_tracks(text_file, tracks)
 
@@ -274,7 +275,7 @@ def check_exists(music_file, raw_song, islist=True):
             # do not prompt and skip the current song
             # if already downloaded when using list
             if islist:
-                print('Song already exists')
+                logging.info('Song already exists')
                 return True
             # if downloading only single song, prompt to re-download
             else:
@@ -297,8 +298,8 @@ def grab_list(text_file):
         lines.remove('')
     except ValueError:
         pass
-    print(u'Total songs in list: {0} songs'.format(len(lines)))
-    print('')
+    logging.info(u'Total songs in list: {0} songs'.format(len(lines)))
+    logging.info('')
     # nth input song
     number = 1
     for raw_song in lines:
@@ -319,14 +320,14 @@ def grab_list(text_file):
             # and append it to the last line in .txt
             with open(text_file, 'a') as myfile:
                 myfile.write(raw_song + '\n')
-            print('Failed to download song. Will retry after other songs.')
+            logging.warning('Failed to download song. Will retry after other songs.')
             # wait 0.5 sec to avoid infinite looping
             time.sleep(0.5)
             continue
         except KeyboardInterrupt:
             misc.grace_quit()
         finally:
-            print('')
+            logging.info('')
         misc.trim_song(text_file)
         number += 1
 
@@ -385,9 +386,9 @@ def grab_single(raw_song, number=None):
     if misc.is_youtube(raw_song):
         raw_song = slugify(content.title).replace('-', ' ')
 
-    # print '[number]. [artist] - [song]' if downloading from list
-    # otherwise print '[artist] - [song]'
-    print(get_youtube_title(content, number))
+    # logging.info('[number]. [artist] - [song]' if downloading from list)
+    # otherwise logging.info('[artist] - [song]')
+    logging.info(get_youtube_title(content, number))
 
     # generate file name of the song to download
     meta_tags = generate_metadata(raw_song)
@@ -402,7 +403,7 @@ def grab_single(raw_song, number=None):
 
     if not check_exists(file_name, raw_song, islist=islist):
         if download_song(file_name, content):
-            print('')
+            logging.info('')
             input_song = file_name + args.input_ext
             output_song = file_name + args.output_ext
             convert.song(input_song, output_song, args.folder,
@@ -413,7 +414,7 @@ def grab_single(raw_song, number=None):
             if not args.no_metadata:
                 metadata.embed(os.path.join(args.folder, output_song), meta_tags)
         else:
-            print('No audio streams available')
+            logging.error('No audio streams available')
 
 
 class TestArgs(object):
@@ -432,6 +433,12 @@ if __name__ == '__main__':
     args = misc.get_arguments()
 
     misc.filter_path(args.folder)
+
+    if args.verbose:
+        logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
+        logging.info("Verbose output.")
+    else:
+        logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 
     if args.song:
         grab_single(raw_song=args.song)

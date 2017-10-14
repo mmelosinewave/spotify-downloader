@@ -4,7 +4,9 @@ import argparse
 import spotipy.oauth2 as oauth2
 from urllib.request import quote
 from slugify import slugify
+import logging
 
+logger = logging.getLogger(__name__)
 
 def input_link(links):
     """Let the user input a number."""
@@ -16,9 +18,9 @@ def input_link(links):
             elif the_chosen_one == 0:
                 return None
             else:
-                print('Choose a valid number!')
+                logger.warning('Choose a valid number!')
         except ValueError:
-            print('Choose a valid number!')
+            logger.warning('Choose a valid number!')
 
 
 def trim_song(file):
@@ -127,7 +129,7 @@ def filter_path(path):
 
 
 def grace_quit():
-    print('\n\nExiting.')
+    logger.info('\n\nExiting.')
     sys.exit()
 
 def get_sec(time_str):

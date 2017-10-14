@@ -1,6 +1,8 @@
 import subprocess
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 """
 What are the differences and similarities between ffmpeg, libav, and avconv?
@@ -15,7 +17,7 @@ https://trac.ffmpeg.org/wiki/Encode/AAC
 def song(input_song, output_song, folder, avconv=False, verbose=False):
     """Do the audio format conversion."""
     if not input_song == output_song:
-        print('Converting {0} to {1}'.format(
+        logger.info('Converting {0} to {1}'.format(
             input_song, output_song.split('.')[-1]))
         if avconv:
             exit_code = convert_with_avconv(input_song, output_song, folder, verbose)
