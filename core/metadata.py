@@ -1,6 +1,7 @@
 from mutagen.easyid3 import EasyID3
 from mutagen.id3 import ID3, APIC
 from mutagen.mp4 import MP4, MP4Cover
+from core.logger import log
 
 import urllib.request
 
@@ -24,23 +25,23 @@ def compare(music_file, metadata):
 
 
 def embed(music_file, meta_tags):
-    """Embed metadata."""
+    """ Embed metadata. """
     if meta_tags is None:
-        print('Could not find meta-tags')
+        log.warning('Could not find metadata')
         return None
     elif music_file.endswith('.m4a'):
-        print('Fixing meta-tags')
+        log.info('Applying metadata')
         return embed_m4a(music_file, meta_tags)
     elif music_file.endswith('.mp3'):
-        print('Fixing meta-tags')
+        log.info('Applying metadata')
         return embed_mp3(music_file, meta_tags)
     else:
-        print('Cannot embed meta-tags into given output extension')
+        log.warning('Cannot embed metadata into given output extension')
         return False
 
 
 def embed_mp3(music_file, meta_tags):
-    """Embed metadata to MP3 files."""
+    """ Embed metadata to MP3 files. """
     # EasyID3 is fun to use ;)
     audiofile = EasyID3(music_file)
     audiofile['artist'] = meta_tags['artists'][0]['name']
@@ -57,14 +58,15 @@ def embed_mp3(music_file, meta_tags):
     audiofile['lyricist'] = meta_tags['artists'][0]['name']
     audiofile['arranger'] = meta_tags['artists'][0]['name']
     audiofile['performer'] = meta_tags['artists'][0]['name']
-    audiofile['encodedby'] = meta_tags['publisher']
     audiofile['website'] = meta_tags['external_urls']['spotify']
     audiofile['length'] = str(meta_tags['duration_ms'] / 1000)
+    if meta_tags['publisher']:
+        audiofile['encodedby'] = meta_tags['publisher']
     if meta_tags['genre']:
         audiofile['genre'] = meta_tags['genre']
     if meta_tags['copyright']:
         audiofile['copyright'] = meta_tags['copyright']
-    if meta_tags['isrc']:
+    if meta_tags['external_ids']['isrc']:
         audiofile['isrc'] = meta_tags['external_ids']['isrc']
     audiofile.save(v2_version=3)
     audiofile = ID3(music_file)
@@ -80,7 +82,7 @@ def embed_mp3(music_file, meta_tags):
 
 
 def embed_m4a(music_file, meta_tags):
-    """Embed metadata to M4A files."""
+    """ Embed metadata to M4A files. """
     # Apple has specific tags - see mutagen docs -
     # http://mutagen.readthedocs.io/en/latest/api/mp4.html
     tags = {'album': '\xa9alb',
