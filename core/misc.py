@@ -1,31 +1,28 @@
+import sys
+import os
 import argparse
 import spotipy.oauth2 as oauth2
 from urllib.request import quote
-from slugify import SLUG_OK, slugify
-
-import sys
-import os
-from core.logger import log, log_leveller, _LOG_LEVELS_STR
+from slugify import slugify
 
 
 def input_link(links):
-    """ Let the user input a choice. """
+    """Let the user input a number."""
     while True:
         try:
-            log.info('Choose your number:')
-            the_chosen_one = int(input('> '))
+            the_chosen_one = int(input('>> Choose your number: '))
             if 1 <= the_chosen_one <= len(links):
                 return links[the_chosen_one - 1]
             elif the_chosen_one == 0:
                 return None
             else:
-                log.warning('Choose a valid number!')
+                print('Choose a valid number!')
         except ValueError:
-            log.warning('Choose a valid number!')
+            print('Choose a valid number!')
 
 
 def trim_song(file):
-    """ Remove the first song from file. """
+    """Remove the first song from file."""
     with open(file, 'r') as file_in:
         data = file_in.read().splitlines(True)
     with open(file, 'w') as file_out:
@@ -60,35 +57,29 @@ def get_arguments():
         help='Use avconv for conversion otherwise set defaults to ffmpeg',
         action='store_true')
     parser.add_argument(
-        '-f', '--folder', default=(os.path.join(sys.path[0], 'Music')),
+        '-f', '--folder', default='Music/',
         help='path to folder where files will be stored in')
     parser.add_argument(
-        '-i', '--input-ext', default='.m4a',
+        '-v', '--verbose', default=False, help='show debug output',
+        action='store_true')
+    parser.add_argument(
+        '-i', '--input_ext', default='.m4a',
         help='prefered input format .m4a or .webm (Opus)')
     parser.add_argument(
-        '-o', '--output-ext', default='.mp3',
+        '-o', '--output_ext', default='.mp3',
         help='prefered output extension .mp3 or .m4a (AAC)')
-    parser.add_argument(
-        '-ll', '--log-level', default='INFO',
-        choices=_LOG_LEVELS_STR,
-        type=str.upper,
-        help='set log verbosity')
 
-    parsed = parser.parse_args()
-    parsed.log_level = log_leveller(parsed.log_level)
-
-    return parsed
+    return parser.parse_args()
 
 
 def is_spotify(raw_song):
-    """ Check if the input song is a Spotify link. """
+    """Check if the input song is a Spotify link."""
     status = len(raw_song) == 22 and raw_song.replace(" ", "%20") == raw_song
     status = status or raw_song.find('spotify') > -1
     return status
 
-
 def is_youtube(raw_song):
-    """ Check if the input song is a YouTube link. """
+    """Check if the input song is a YouTube link."""
     status = len(raw_song) == 11 and raw_song.replace(" ", "%20") == raw_song
     status = status and not raw_song.lower() == raw_song
     status = status or 'youtube.com/watch?v=' in raw_song
@@ -96,7 +87,7 @@ def is_youtube(raw_song):
 
 
 def sanitize_title(title):
-    """ Generate filename of the song to be downloaded. """
+    """Generate filename of the song to be downloaded."""
     title = title.replace(' ', '_')
     title = title.replace('/', '_')
 
@@ -106,7 +97,7 @@ def sanitize_title(title):
 
 
 def generate_token():
-    """ Generate the token. Please respect these credentials :) """
+    """Generate the token. Please respect these credentials :)"""
     credentials = oauth2.SpotifyClientCredentials(
         client_id='4fe3fecfe5334023a1472516cc99d805',
         client_secret='0f02b7c483c04257984695007a4a8d5c')
@@ -115,7 +106,7 @@ def generate_token():
 
 
 def generate_search_url(song, viewsort=False):
-    """ Generate YouTube search URL for the given song. """
+    """Generate YouTube search URL for the given song."""
     # urllib.request.quote() encodes URL with special characters
     song = quote(song)
     if viewsort:
@@ -127,6 +118,7 @@ def generate_search_url(song, viewsort=False):
 
 
 def filter_path(path):
+    os.chdir(sys.path[0])
     if not os.path.exists(path):
         os.makedirs(path)
     for temp in os.listdir(path):
@@ -134,14 +126,18 @@ def filter_path(path):
             os.remove(os.path.join(path, temp))
 
 
+def grace_quit():
+    print('\n\nExiting.')
+    sys.exit()
+
 def get_sec(time_str):
-    v = time_str.split(':', 3)
-    v.reverse()
-    sec = 0
-    if len(v) > 0:  # seconds
-        sec += int(v[0])
-    if len(v) > 1:  # minutes
-        sec += int(v[1]) * 60
-    if len(v) > 2:  # hours
-        sec += int(v[2]) * 3600
-    return sec
+   v = time_str.split(':', 3)
+   v.reverse()
+   sec = 0
+   if len(v) > 0: #seconds
+       sec += int(v[0])
+   if len(v) > 1: # minutes
+       sec += int(v[1]) * 60
+   if len(v) > 2: # hours
+       sec += int(v[2]) * 3600
+   return sec

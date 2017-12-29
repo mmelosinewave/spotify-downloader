@@ -17,7 +17,7 @@
   - Track number
   - Disc number
   - Release date
-  - And more...
+  - And some more...
 
 - Works straight out of the box and does not require to generate or mess with your API keys.
 
@@ -25,21 +25,19 @@ That's how your Music library will look like!
 
 <img src="http://i.imgur.com/Gpch7JI.png" width="290"><img src="http://i.imgur.com/5vhk3HY.png" width="290"><img src="http://i.imgur.com/RDTCCST.png" width="290">
 
-## Contributing
+## Reporting Issues
 
 - Search for your problem in the [issues section](https://github.com/Ritiek/spotify-downloader/issues?utf8=%E2%9C%93&q=) before opening a new ticket. It might be already answered and save us time. :smile:
 
 - Provide as much information possible when opening your ticket.
 
-- Look up for open issues and see if you can help out there.
-
-- There's also a web-based application for this tool under (major) work called [spotifube](https://github.com/djalmaaraujo/spotifube). Check it out if you'd like to contribute to it!
-
 ## Installation & Usage
+
+<img src="http://i.imgur.com/Dg8p9up.png" width="600">
 
 - **This tool supports only Python 3**, Python 2 compatibility was dropped because of the way it deals with unicode. If you need to use Python 2 though, check out the (old) `python2` branch.
 
-- Note: `play` and `lyrics` commands have been deprecated in the current branch since they were not of much use and created unnecessary clutter. You can still get them back by using `old` branch though.
+- Note: `play` and `lyrics` commands have been deprecated in the current brach since they were not of much use and created unnecessary clutter. You can still get them back by using `old` branch though.
 
 ### Debian, Ubuntu, Linux & Mac
 
@@ -70,17 +68,6 @@ Assuming you have Python 3 ([preferably v3.6 or above to stay away from Unicode 
 
 - Open `cmd` and type `pip install -U -r requirements.txt` to install dependencies. The same note about `pip` as for Debian, Ubuntu, Linux & Mac applies.
 
-## Docker
-
-Create the docker image and use the `-s` `-p` `-l` to download single song, prepare playlist and download list file.
-
-```
-docker build -t ritiek/spotdl .
-docker run --rm -v $(pwd):/app ritiek/spotdl -s https://open.spotify.com/track/4eSv18SwAXoQJF6tPqFIyw
-docker run --rm -v $(pwd):/app ritiek/spotdl -p https://open.spotify.com/user/spotify/playlist/37i9dQZF1DX2iUghHXGIjj
-docker run --rm -v $(pwd):/app ritiek/spotdl -l acoustic-blues.txt
-```
-
 ## Instructions for Downloading Songs
 
 
@@ -89,10 +76,8 @@ docker run --rm -v $(pwd):/app ritiek/spotdl -l acoustic-blues.txt
 - For all available options, run `python3 spotdl.py --help`.
 
 ```
-usage: spotdl.py [-h]
-                 (-s SONG | -l LIST | -p PLAYLIST | -b ALBUM | -u USERNAME)
-                 [-m] [-nm] [-a] [-f FOLDER] [-v] [-i INPUT_EXT]
-                 [-o OUTPUT_EXT] [-ll {INFO,WARNING,ERROR,DEBUG}]
+usage: spotdl.py [-h] (-s SONG | -l LIST | -p PLAYLIST | -u USERNAME) [-m]
+                 [-nm] [-a] [-f FOLDER] [-v] [-i INPUT_EXT] [-o OUTPUT_EXT]
 
 Download and convert songs from Spotify, Youtube etc.
 
@@ -116,21 +101,20 @@ optional arguments:
   -f FOLDER, --folder FOLDER
                         path to folder where files will be stored in (default:
                         Music/)
-  -i INPUT_EXT, --input-ext INPUT_EXT
+  -v, --verbose         show debug output (default: False)
+  -i INPUT_EXT, --input_ext INPUT_EXT
                         prefered input format .m4a or .webm (Opus) (default:
                         .m4a)
-  -o OUTPUT_EXT, --output-ext OUTPUT_EXT
+  -o OUTPUT_EXT, --output_ext OUTPUT_EXT
                         prefered output extension .mp3 or .m4a (AAC) (default:
                         .mp3)
-  -ll {INFO,WARNING,ERROR,DEBUG}, --log-level {INFO,WARNING,ERROR,DEBUG}
-                        set log verbosity (default: INFO)
 ```
 
 #### Download by Name
 
 For example
 
-- We want to download Fade by Alan Walker, simply run `python3 spotdl.py --song "alan walker fade"`.
+- We want to download Hello by Adele, simply run `python3 spotdl.py --song "adele hello"`.
 
 - The script will automatically look for the best matching song and download it in the folder `Music/` placed in the root directory of the code base.
 
@@ -140,9 +124,9 @@ For example
 
 For example
 
-- We want to download the same song (i.e: Fade by Alan Walker) but using Spotify Link this time that looks like  `https://open.spotify.com/track/2lfPecqFbH8X4lHSpTxt8l`, you can copy it from your Spotify desktop or mobile app by right clicking or long tap on the song and copy HTTP link.
+- We want to download the same song (i.e: Hello by Adele) but using Spotify Link this time that looks like  `http://open.spotify.com/track/1MDoll6jK4rrk2BcFRP5i7`, you can copy it from your Spotify desktop or mobile app by right clicking or long tap on the song and copy HTTP link.
 
-- Run `python3 spotdl.py --song https://open.spotify.com/track/2lfPecqFbH8X4lHSpTxt8l`, it should download Fade by Alan Walker.
+- Run `python3 spotdl.py --song http://open.spotify.com/track/1MDoll6jK4rrk2BcFRP5i7`, it should download Hello by Adele.
 
 - Just like before, it will again convert the song to an mp3 but since we used a Spotify HTTP link, the script is guaranteed to fetch the correct meta-tags and album-art.
 
@@ -150,9 +134,9 @@ For example
 
 For example
 
-- We want to download `Fade by Alan Walker`, `Sky High by Elektromania` and `Fire by Elektromania` just using a single command.
+- We want to download `Hello by Adele`, `The Nights by Avicci` and `21 Guns by Green Day` just using a single command.
 
-Let's suppose, we have the Spotify link for only `Fade by Alan Walker` and `Fire by Elektromania`.
+Let's suppose, we have the Spotify link for only `Hello by Adele` and `21 Guns by Green Day`.
 
 No problem!
 
@@ -161,9 +145,9 @@ No problem!
 (if you are on Windows, just edit `list.txt` - i.e `C:\Python36\spotify-downloader-master\list.txt`)
 
 ```
-https://open.spotify.com/track/2lfPecqFbH8X4lHSpTxt8l
-elektromania sky high
-https://open.spotify.com/track/0fbspWuEdaaT9vfmbAZr1C
+https://open.spotify.com/track/1MDoll6jK4rrk2BcFRP5i7
+the nights avicci
+http://open.spotify.com/track/64yrDBpcdwEdNY9loyEGbX
 ```
 
 - Now pass `--list=list.txt` to the script, i.e `python3 spotdl.py --list=list.txt` and it will start downloading songs mentioned in `list.txt`.
@@ -174,11 +158,11 @@ https://open.spotify.com/track/0fbspWuEdaaT9vfmbAZr1C
 
 #### Download playlists
 
-- You can copy the Spotify URL of the playlist and pass it in `--playlist` option. Note: This method works for public as well as private playlists.
+- You can copy the Spotify URL of the playlist and pass it in `--playlist` option.
 
 For example
 
-- `python3 spotdl.py --playlist https://open.spotify.com/user/nocopyrightsounds/playlist/7sZbq8QGyMnhKPcLJvCUFD`
+- `python3 spotdl.py --playlist https://open.spotify.com/user/camillazi/playlist/71MXqcSOKCxsLNtRvONkhF`
 
 - The script will load all the tracks from the playlist into `<playlist_name>.txt`
 
@@ -190,7 +174,7 @@ For example
 
 For example
 
-- `python3 spotdl.py --album https://open.spotify.com/album/499J8bIsEnU7DSrosFDJJg`
+- `python3 spotdl.py --album https://open.spotify.com/album/7CjakTZxwIF8oixONe6Bpb`
 
 - The script will load all the tracks from the album into `<album_name>.txt`
 
@@ -198,9 +182,9 @@ For example
 
 #### Download playlists by username
 
-- You can also load songs using Spotify username if you don't have the playlist URL. (Open profile in Spotify, click on the three little dots below name, "Share", "Copy to clipboard", paste last numbers or text into command-line: `https://open.spotify.com/user/0123456790`)
+- You can also load songs using Spotify username if you don't have the playlist URL. (Open profile in Spotify, click on the three little dots below name, "Share", "Copy to clipboard", paste last numbers into command-line: `https://open.spotify.com/user/0123456790`)
 
-- Try running `python3 spotdl.py -u <your_username>`, it will (only) show all your public playlists (which excludes collaborative and private playlists).
+- Try running `python3 spotdl.py -u <your_username>`, it will show all your public playlists.
 
 - Once you select the one you want to download, the script will load all the tracks from the playlist into `<playlist_name>.txt`.
 
@@ -210,30 +194,13 @@ For example
 
 If you don't want to download all the songs to the `Music/` folder relative to the `spotdl.py` script, you can use the `-f`/`--folder` option. E.g. `python3 spotdl.py -s "adele hello" -f "/home/user/Music/"`. This works with both relative and absolute paths.
 
-#### Preserve spaces in file names
-
-Beside some other characters, spaces will be replaced by underscores. There's no option to change this behavior in spotify-downloader itself, but on Unix-based operating systems you can issue the following Bash command after downloading is done:
-
-    find . -type f -name "*.mp3" -exec bash -c 'mv "$0" "${0//_/ }"' {} \;
-
-Just make sure your working directory is the one you have the music files in.
-
-## Exit codes
-
-- `0` - Success
-- `1` - Unknown error
-- `2` - Command line error (e.g. invalid args)
-- `-1` - KeyboardInterrupt
-- `10` - Invalid playlist URL
-- `11` - Playlist not found
-
 ## Running tests
 
 ```
 python3 -m pytest test
 ```
 
-Obviously this requires the `pytest` module to be installed.
+Obviously this requires the `pytest` module to be installed. 
 
 ## Disclaimer
 

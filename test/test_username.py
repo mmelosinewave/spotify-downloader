@@ -33,7 +33,8 @@ def test_tracks():
                 try:
                     fout.write(track['external_urls']['spotify'] + '\n')
                 except KeyError:
-                    pass
+                    title = track['name'] + ' by '+ track['artists'][0]['name']
+                    print('Skipping track ' + title + ' (local only?)')
             # 1 page = 50 results
             # check if there are more pages
             if tracks['next']:
@@ -44,7 +45,7 @@ def test_tracks():
     with open('list.txt', 'r') as listed:
         expect_song = (listed.read()).splitlines()[0]
 
-    spotdl.internals.trim_song('list.txt')
+    spotdl.misc.trim_song('list.txt')
     with open('list.txt', 'a') as myfile:
         myfile.write(expect_song)
 
